@@ -39,7 +39,7 @@ window.addEventListener("load", () => {
   sym.drawBalls();
   requestAnimationFrame(animate);
  };
- for (let i = 0; i < 25; i++) {
+ for (let i = 0; i < 15; i++) {
   const randX = Math.floor(Math.random() * sym.width);
   const randY = Math.floor(Math.random() * 100);
   const randSize = Math.floor(Math.random() * 40);
