@@ -1,8 +1,5 @@
 import Ball from "./ball.js";
 
-let WIDTH;
-let HEIGHT;
-
 class Sym {
   constructor(canvas, context) {
     this.canvas = canvas;
@@ -15,8 +12,16 @@ class Sym {
     this.prevPosY = performance.now();
     this.prevPosX = performance.now();
     this.balls = [
-      new Ball(this, this.width / 2, this.height / 2, 25, "#EEEEEE"),
+      //   new Ball(this, this.width / 2, this.height / 2, 25, "#EEEEEE"),
     ];
+    // We will define an object "this.grid" for initializing a new grid within Sym class to optimize our code. This is our first step into spacial partitioning for our simulation. This will significantly reduce the computational weight in our draw balls method
+    this.grid = {
+      size: {
+        x: 0,
+        y: 0,
+      },
+      map: new Map(),
+    };
     this.canvas.addEventListener("touchstart", this.selectBall.bind(this));
     this.canvas.addEventListener("touchmove", this.moveBall.bind(this));
     this.canvas.addEventListener("touchend", this.deSelectBall.bind(this));
@@ -26,6 +31,21 @@ class Sym {
   }
   clear() {
     this.ctx.clearRect(0, 0, this.width, this.height);
+  }
+  initializeGrid() {
+    // Call this method after creating a new Sym class and defining creating your balls to properly initialize the grid
+    const sizes = [];
+    for (let i = 0; i < this.balls.length; i++) {
+      const size = this.balls[i].r * 2;
+      sizes.push(size);
+    }
+    const sum = sizes.reduce((a, b) => a + b);
+    const avg = Math.round(sum / this.balls.length);
+    this.grid.size.w = Math.round(this.width / avg);
+    this.grid.size.h = Math.round(this.height / avg);
+    for (let i = 0; i < this.balls.length; i++) {
+      // add balls to the grid Map
+    }
   }
   drawBalls() {
     for (let i = 0; i < this.balls.length; i++) {
