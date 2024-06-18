@@ -17,8 +17,8 @@ class Sym {
     // We will define an object "this.grid" for initializing a new grid within Sym class to optimize our code. This is our first step into spacial partitioning for our simulation. This will significantly reduce the computational weight in our draw balls method
     this.grid = {
       size: {
-        x: 0,
-        y: 0,
+        w: 0,
+        h: 0,
       },
       map: new Map(),
     };
@@ -44,15 +44,38 @@ class Sym {
     this.grid.size.w = Math.round(this.width / avg);
     this.grid.size.h = Math.round(this.height / avg);
     for (let i = 0; i < this.balls.length; i++) {
-      // add balls to the grid Map
+      const gridX = this.balls[i].x / this.grid.size.w;
+      const gridY = this.balls[i].y / this.grid.size.h;
+      // const p1 = { x: gridX, y: gridY };
+      this.grid.map.set(`${Math.round(gridX + gridY)}`, this.balls[i]);
     }
+    console.log(this.grid);
+  }
+  getBallsToCheck(gridPos) {
+    let ballsToCheck = [];
+    for (let i = 0; i < this.grid.map.length; i++) {
+      ballsToCheck.push(this.grid.map.get(`${gridPos - 2}`));
+      ballsToCheck.push(this.grid.map.get(`${gridPos - 1}`));
+      ballsToCheck.push(this.grid.map.get(`${gridPos}`));
+      ballsToCheck.push(this.grid.map.get(`${gridPos + 1}`));
+      ballsToCheck.push(this.grid.map.get(`${gridPos + 2}`));
+    }
+    return ballsToCheck;
   }
   drawBalls() {
     for (let i = 0; i < this.balls.length; i++) {
       this.balls[i].draw();
-      for (let j = i + 1; j < this.balls.length; j++) {
+      const gridX = this.balls[i].x / this.grid.size.w;
+      const gridY = this.balls[i].y / this.grid.size.h;
+      const gridPos = Math.round(gridX + gridY);
+      // Calculate ball collision within grid
+      const ballsToCheck = this.getBallsToCheck(gridPos);
+      // for (let j = i + 1; j < this.balls.length; j++) {
+      // new for loop only checking balls in vicinity
+      for (let j = 0; j < ballsToCheck.length; j++) {
         const ballA = this.balls[i];
-        const ballB = this.balls[j];
+        // const ballB = this.balls[j];
+        const ballB = ballsToCheck[j];
         const posA = ballA.getPos();
         const posB = ballB.getPos();
         const xDiff = posB.x - posA.x;
@@ -90,10 +113,12 @@ class Sym {
           ballB.x += correctionX;
           ballB.y += correctionY;
         }
+        this.initializeGrid();
+        // }
+        // if (!this.balls[i].isDragging) {
+        this.balls[i].update(this.tilt);
+        // }
       }
-      // if (!this.balls[i].isDragging) {
-      this.balls[i].update(this.tilt);
-      // }
     }
   }
   createBall(x, y, r = 25, fill = "#EEEEEE") {
