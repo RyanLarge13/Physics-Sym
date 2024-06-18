@@ -34,54 +34,67 @@ class Sym {
   }
   initializeGrid() {
     // Call this method after creating a new Sym class and defining creating your balls to properly initialize the grid
-    const sizes = [];
-    for (let i = 0; i < this.balls.length; i++) {
-      const size = this.balls[i].r * 2;
-      sizes.push(size);
-    }
-    const sum = sizes.reduce((a, b) => a + b);
-    const avg = Math.round(sum / this.balls.length);
+    // const sizes = [];
+    // for (let i = 0; i < this.balls.length; i++) {
+    //   const size = this.balls[i].r * 2;
+    //   sizes.push(size);
+    // }
+    // const sum = sizes.reduce((a, b) => a + b, 0);
+    // creating a new avg that is static to see if performance increases without'
+    // calculating new sizes and averaging then each call
+    // this worked a little
+    const avg = 20;
+    // const avg = Math.round(sum / this.balls.length);
     this.grid.size.w = Math.round(this.width / avg);
     this.grid.size.h = Math.round(this.height / avg);
+    this.grid.map = new Map();
     for (let i = 0; i < this.balls.length; i++) {
-      const gridX = this.balls[i].x / this.grid.size.w;
-      const gridY = this.balls[i].y / this.grid.size.h;
-      // const p1 = { x: gridX, y: gridY };
-      this.grid.map.set(`${Math.round(gridX + gridY)}`, this.balls[i]);
+      const gridX = Math.round(this.balls[i].x / this.grid.size.w);
+      const gridY = Math.round(this.balls[i].y / this.grid.size.h);
+      const key = `${gridX},${gridY}`;
+      if (!this.grid.map.has(key)) {
+        this.grid.map.set(key, []);
+      }
+      this.grid.map.get(key).push(this.balls[i]);
     }
-    console.log(this.grid);
   }
   getBallsToCheck(gridPos) {
+    const [gridX, gridY] = gridPos.split(",").map(Number);
     let ballsToCheck = [];
-    for (let i = 0; i < this.grid.map.length; i++) {
-      ballsToCheck.push(this.grid.map.get(`${gridPos - 2}`));
-      ballsToCheck.push(this.grid.map.get(`${gridPos - 1}`));
-      ballsToCheck.push(this.grid.map.get(`${gridPos}`));
-      ballsToCheck.push(this.grid.map.get(`${gridPos + 1}`));
-      ballsToCheck.push(this.grid.map.get(`${gridPos + 2}`));
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const key = `${gridX + dx},${gridY + dy}`;
+        if (this.grid.map.has(key)) {
+          ballsToCheck = ballsToCheck.concat(this.grid.map.get(key));
+        }
+      }
     }
     return ballsToCheck;
   }
   drawBalls() {
     for (let i = 0; i < this.balls.length; i++) {
       this.balls[i].draw();
-      const gridX = this.balls[i].x / this.grid.size.w;
-      const gridY = this.balls[i].y / this.grid.size.h;
-      const gridPos = Math.round(gridX + gridY);
-      // Calculate ball collision within grid
-      const ballsToCheck = this.getBallsToCheck(gridPos);
+      const gridX = Math.round(this.balls[i].x / this.grid.size.w);
+      const gridY = Math.round(this.balls[i].y / this.grid.size.h);
+      // Calculate ball collisions within grid coordinate vicinity
+      const ballsToCheck = this.getBallsToCheck(`${gridX},${gridY}`);
       // for (let j = i + 1; j < this.balls.length; j++) {
       // new for loop only checking balls in vicinity
       for (let j = 0; j < ballsToCheck.length; j++) {
         const ballA = this.balls[i];
         // const ballB = this.balls[j];
         const ballB = ballsToCheck[j];
-        const posA = ballA.getPos();
-        const posB = ballB.getPos();
-        const xDiff = posB.x - posA.x;
-        const yDiff = posB.y - posA.y;
+        // since we use now a grid based collision detection we will check if ballA and ballB are in fact the same ball;
+        if (ballA === ballB) {
+          continue;
+        }
+        // commenting out to for performance?
+        // const posA = ballA.getPos();
+        // const posB = ballB.getPos();
+        const xDiff = ballB.x - ballA.x;
+        const yDiff = ballB.y - ballA.y;
         const distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-        const minDistance = posA.r + posB.r;
+        const minDistance = ballA.r + ballB.r;
         // We calculate the distance between balls delta Y and X values and compare it to the combined radii
         if (distance < minDistance) {
           const normalX = xDiff / distance;
@@ -113,13 +126,13 @@ class Sym {
           ballB.x += correctionX;
           ballB.y += correctionY;
         }
-        this.initializeGrid();
         // }
         // if (!this.balls[i].isDragging) {
-        this.balls[i].update(this.tilt);
         // }
       }
+      this.balls[i].update(this.tilt);
     }
+    this.initializeGrid();
   }
   createBall(x, y, r = 25, fill = "#EEEEEE") {
     const newBall = new Ball(this, x, y, r, fill);

@@ -40,12 +40,12 @@ window.addEventListener("load", () => {
     sym.drawBalls();
     requestAnimationFrame(animate);
   };
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 5000; i++) {
     const randX = Math.floor(Math.random() * sym.width);
     const randY = Math.floor(Math.random() * sym.height);
     const randSize = Math.floor(Math.random() * 40);
     const randColor = Math.floor(Math.random() * 10);
-    sym.createBall(randX, randY, randSize, `#f${randColor}f`);
+    sym.createBall(randX, randY, 5, `#f${randColor}f`);
   }
   sym.initializeGrid();
   animate();
