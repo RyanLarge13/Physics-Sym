@@ -17,8 +17,8 @@ class Sym {
     // We will define an object "this.grid" for initializing a new grid within Sym class to optimize our code. This is our first step into spacial partitioning for our simulation. This will significantly reduce the computational weight in our draw balls method
     this.grid = {
       size: {
-        w: 0,
-        h: 0,
+        w: this.width / (this.width / 10),
+        h: this.height / (this.width / 10),
       },
       map: new Map(),
     };
@@ -43,10 +43,10 @@ class Sym {
     // creating a new avg that is static to see if performance increases without'
     // calculating new sizes and averaging then each call
     // this worked a little
-    const avg = 20;
-    // const avg = Math.round(sum / this.balls.length);
-    this.grid.size.w = Math.round(this.width / avg);
-    this.grid.size.h = Math.round(this.height / avg);
+    // const avg = 100;
+    // // const avg = Math.round(sum / this.balls.length);
+    // this.grid.size.w = Math.round(this.width / avg);
+    // this.grid.size.h = Math.round(this.height / avg);
     this.grid.map = new Map();
     for (let i = 0; i < this.balls.length; i++) {
       const gridX = Math.round(this.balls[i].x / this.grid.size.w);
@@ -88,13 +88,12 @@ class Sym {
         if (ballA === ballB) {
           continue;
         }
-        // commenting out to for performance?
-        // const posA = ballA.getPos();
-        // const posB = ballB.getPos();
         const xDiff = ballB.x - ballA.x;
         const yDiff = ballB.y - ballA.y;
         const distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-        const minDistance = ballA.r + ballB.r;
+        // allowed to comment out this calculation given static ball sizes across the board
+        // const minDistance = ballA.r + ballB.r;
+        const minDistance = 10;
         // We calculate the distance between balls delta Y and X values and compare it to the combined radii
         if (distance < minDistance) {
           const normalX = xDiff / distance;
@@ -108,7 +107,7 @@ class Sym {
           // near the same as another allowing the balls mass to do the work instead. Creating a realistic relative velocity and force.
           //  This will potentially change in the future
           //const restitution = (ballA.restitution + ballB.restitution) / 2;
-          const restitution = 1;
+          const restitution = 0.99;
           const impulse =
             (-(1 + restitution) * velocityAlongNormal) /
             (1 / ballA.mass + 1 / ballB.mass);
@@ -117,6 +116,11 @@ class Sym {
           ballA.velocityY += (impulse * normalY) / ballA.mass;
           ballB.velocityX -= (impulse * normalX) / ballB.mass;
           ballB.velocityY -= (impulse * normalY) / ballB.mass;
+          // figure out where to set this
+          if (Math.abs(ballA.velocityX) < 0.01) ballA.velocityX = 0;
+          if (Math.abs(ballA.velocityY) < 0.01) ballA.velocityY = 0;
+          if (Math.abs(ballB.velocityX) < 0.01) ballB.velocityX = 0;
+          if (Math.abs(ballB.velocityY) < 0.01) ballB.velocityY = 0;
           const overlap = minDistance - distance;
           const correctionFactor = 0.5;
           const correctionX = overlap * normalX * correctionFactor;
