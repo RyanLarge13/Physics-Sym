@@ -3,6 +3,7 @@ import Ball from "./ball.js";
 class Sym {
   constructor(canvas, context) {
     this.canvas = canvas;
+    this.worker = new Worker("./worker.js");
     this.ctx = context;
     this.width = this.canvas.width;
     this.height = this.canvas.height;
@@ -17,8 +18,8 @@ class Sym {
     // We will define an object "this.grid" for initializing a new grid within Sym class to optimize our code. This is our first step into spacial partitioning for our simulation. This will significantly reduce the computational weight in our draw balls method
     this.grid = {
       size: {
-        w: this.width / (this.width / 10),
-        h: this.height / (this.width / 10),
+        w: this.width / (this.width / 20),
+        h: this.height / (this.height / 20),
       },
       map: new Map(),
     };
@@ -107,7 +108,7 @@ class Sym {
           // near the same as another allowing the balls mass to do the work instead. Creating a realistic relative velocity and force.
           //  This will potentially change in the future
           //const restitution = (ballA.restitution + ballB.restitution) / 2;
-          const restitution = 0.99;
+          const restitution = 1;
           const impulse =
             (-(1 + restitution) * velocityAlongNormal) /
             (1 / ballA.mass + 1 / ballB.mass);
@@ -116,11 +117,6 @@ class Sym {
           ballA.velocityY += (impulse * normalY) / ballA.mass;
           ballB.velocityX -= (impulse * normalX) / ballB.mass;
           ballB.velocityY -= (impulse * normalY) / ballB.mass;
-          // figure out where to set this
-          if (Math.abs(ballA.velocityX) < 0.01) ballA.velocityX = 0;
-          if (Math.abs(ballA.velocityY) < 0.01) ballA.velocityY = 0;
-          if (Math.abs(ballB.velocityX) < 0.01) ballB.velocityX = 0;
-          if (Math.abs(ballB.velocityY) < 0.01) ballB.velocityY = 0;
           const overlap = minDistance - distance;
           const correctionFactor = 0.5;
           const correctionX = overlap * normalX * correctionFactor;
@@ -129,6 +125,10 @@ class Sym {
           ballA.y -= correctionY;
           ballB.x += correctionX;
           ballB.y += correctionY;
+          if (Math.abs(ballA.velocityX) < 0.1) ballA.velocityX = 0;
+          if (Math.abs(ballA.velocityY) < 0.1) ballA.velocityY = 0;
+          if (Math.abs(ballB.velocityX) < 0.1) ballB.velocityX = 0;
+          if (Math.abs(ballB.velocityY) < 0.1) ballB.velocityY = 0;
         }
         // }
         // if (!this.balls[i].isDragging) {

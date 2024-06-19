@@ -5,14 +5,14 @@ class Ball {
     this.y = y;
     this.r = r;
     this.fill = fill;
-    this.velocityY = 0;
+    this.velocityY = 0.1;
     this.velocityX = 0;
     // commented out mass is a real life calculation not suitable for my non scaled program instead let's device the radius by 10
     // this.mass = (4 / 3) * Math.PI * Math.pow(r, 3);
     this.mass = r / 10;
-    this.restitution = 1;
-    this.dampingY = 0.9;
-    this.dampingX = 0.9;
+    // this.restitution = 1;
+    this.dampingY = 1;
+    this.dampingX = 1;
     this.gravity = 0.05;
     this.friction = 0.01;
     this.isDragging = false;
@@ -35,7 +35,7 @@ class Ball {
         this.velocityY *= -this.dampingY;
         this.dampingY -= Math.abs((0.1 * this.r) / 100);
         // if the velocity of the ball has decreased to almost 0 we set the velocity to 0 to settle and stop ball movement
-        if (Math.abs(this.velocityY) <= 0.1) {
+        if (Math.abs(this.velocityY) < 0.1) {
           this.velocityY = 0;
           this.dampingY = 0.9;
         }
