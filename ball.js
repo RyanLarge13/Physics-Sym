@@ -11,8 +11,8 @@ class Ball {
     // this.mass = (4 / 3) * Math.PI * Math.pow(r, 3);
     this.mass = r / 10;
     // this.restitution = 1;
-    this.dampingY = 1;
-    this.dampingX = 1;
+    this.dampingY = 0.9;
+    this.dampingX = 0.9;
     this.gravity = 0.05;
     this.friction = 0.01;
     this.isDragging = false;
@@ -25,7 +25,7 @@ class Ball {
     // this.sym.ctx.fillStyle = this.fill;
     let VNormal = (this.velocityY - 0) / (5 - 0);
     VNormal = Math.max(0, Math.min(1, VNormal));
-    const R = Math.round(VNormal * 150);
+    const R = Math.round(VNormal * 255);
     const G = 0;
     const B = Math.round((1 - VNormal) * 255);
     const hex = `#${R.toString(16).padStart(2, "0")}${G.toString(16).padStart(
@@ -42,7 +42,7 @@ class Ball {
       // Handle Y physics and collisions
       if (this.y + this.r >= this.sym.height) {
         this.y = this.sym.height - this.r;
-        // reverse the direction of ball when hitting the ground for bounce effect apply damping effect to decrease balls kenetic energy
+        // reverse the direction of ball when hitting the ground for bounce effect apply damping effect to decrease balls kinetic energy
         this.velocityY *= -this.dampingY;
         this.dampingY -= Math.abs((0.1 * this.r) / 100);
         // if the velocity of the ball has decreased to almost 0 we set the velocity to 0 to settle and stop ball movement
@@ -71,19 +71,19 @@ class Ball {
       } else {
         if (this.velocityX > 0) {
           this.velocityX -= this.friction;
-          if (this.velocityX < 0) {
+          if (this.velocityX <= 0) {
             this.velocityX = 0;
           }
         } else if (this.velocityX < 0) {
           this.velocityX += this.friction;
-          if (this.velocityX > 0) {
+          if (this.velocityX >= 0) {
             this.velocityX = 0;
           }
         }
       }
       // Stop tilt for now
       if (tilt) {
-        this.velocityX += -(Math.floor(tilt) - 90) * this.tiltSensitivity;
+        // this.velocityX += -(Math.floor(tilt) - 90) * this.tiltSensitivity;
       }
       this.y += this.velocityY;
       this.x += this.velocityX;
