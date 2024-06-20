@@ -18,8 +18,8 @@ class Sym {
     // We will define an object "this.grid" for initializing a new grid within Sym class to optimize our code. This is our first step into spacial partitioning for our simulation. This will significantly reduce the computational weight in our draw balls method
     this.grid = {
       size: {
-        w: this.width / (this.width / 20),
-        h: this.height / (this.height / 20),
+        w: this.width / (this.width / 10),
+        h: this.height / (this.height / 10),
       },
       map: new Map(),
     };
@@ -107,8 +107,11 @@ class Sym {
           const relativeVelocityX = ballA.velocityX - ballB.velocityX;
           const relativeVelocityY = ballA.velocityY - ballB.velocityY;
           // Calculate the velocity along the normalized vector between each ball to calculate velocity offsets
-          const velocityAlongNormal =
+          let velocityAlongNormal =
             relativeVelocityX * normalX + relativeVelocityY * normalY;
+          if (velocityAlongNormal < 0.1) {
+            velocityAlongNormal = 0;
+          }
           // commenting out average restitution, given my assumption is that all balls are made of the same material and their elasticity should be all
           // near the same as another allowing the balls mass to do the work instead. Creating a realistic relative velocity and force.
           //  This will potentially change in the future

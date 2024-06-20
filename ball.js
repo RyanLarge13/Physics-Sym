@@ -23,7 +23,7 @@ class Ball {
     this.sym.ctx.arc(this.x, this.y, this.r, Math.PI * 2, false);
     //Instead let's change color based on Y velocity. First we normalize the y velocity with min, max & current values
     // this.sym.ctx.fillStyle = this.fill;
-    let VNormal = (this.velocityY - 0) / (5 - 0);
+    let VNormal = this.velocityY / 5;
     VNormal = Math.max(0, Math.min(1, VNormal));
     const R = Math.round(VNormal * 255);
     const G = 0;
