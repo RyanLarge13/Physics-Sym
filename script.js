@@ -40,7 +40,7 @@ window.addEventListener("load", () => {
     sym.drawBalls();
     requestAnimationFrame(animate);
   };
-  for (let i = 0; i < 10000; i++) {
+  for (let i = 0; i < 1000; i++) {
     const randX = Math.floor(Math.random() * sym.width);
     const randY = Math.floor(Math.random() * sym.height);
     const randSize = Math.floor(Math.random() * 40);
