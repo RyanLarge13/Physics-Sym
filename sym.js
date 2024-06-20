@@ -83,52 +83,40 @@ class Sym {
       this.balls[i].draw();
       const gridX = Math.round(this.balls[i].x / this.grid.size.w);
       const gridY = Math.round(this.balls[i].y / this.grid.size.h);
-      // Calculate ball collisions within grid coordinate vicinity
       const ballsToCheck = this.getBallsToCheck(`${gridX},${gridY}`);
-      // for (let j = i + 1; j < this.balls.length; j++) {
-      // new for loop only checking balls in vicinity
       for (let j = 0; j < ballsToCheck.length; j++) {
         const ballA = this.balls[i];
         const ballB = ballsToCheck[j];
-        // since we use now a grid based collision detection we will check if ballA and ballB are in fact the same ball;
+        const mass = ballA.mass;
         if (ballA === ballB) {
           continue;
         }
-        const xDiff = ballB.x - ballA.x;
-        const yDiff = ballB.y - ballA.y;
-        const distance = Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-        // allowed to comment out this calculation given static ball sizes across the board
-        // const minDistance = ballA.r + ballB.r;
-        const minDistance = 10;
-        // We calculate the distance between balls delta Y and X values and compare it to the combined radii
-        if (distance < minDistance) {
-          const normalX = xDiff / distance;
-          const normalY = yDiff / distance;
-          const relativeVelocityX = ballA.velocityX - ballB.velocityX;
-          const relativeVelocityY = ballA.velocityY - ballB.velocityY;
-          // Calculate the velocity along the normalized vector between each ball to calculate velocity offsets
-          let velocityAlongNormal =
-            relativeVelocityX * normalX + relativeVelocityY * normalY;
-          if (velocityAlongNormal < 0.1) {
-            velocityAlongNormal = 0;
-          }
-          // commenting out average restitution, given my assumption is that all balls are made of the same material and their elasticity should be all
-          // near the same as another allowing the balls mass to do the work instead. Creating a realistic relative velocity and force.
-          //  This will potentially change in the future
-          //const restitution = (ballA.restitution + ballB.restitution) / 2;
-          const restitution = 1;
-          const impulse =
-            (-(1 + restitution) * velocityAlongNormal) /
-            (1 / ballA.mass + 1 / ballB.mass);
-          // Update ball velocities along normal adjusting for mass and restitution
+        this.workers[0].postMessage({
+          ballA: {
+            x: ballA.x,
+            y: ballA.y,
+            velocityX: ballA.velocityX,
+            velocityY: ballA.velocityY,
+            mass: mass,
+          },
+          ballB: {
+            x: ballB.x,
+            y: ballB.y,
+            velocityX: ballB.velocityX,
+            velocityY: ballB.velocityY,
+            mass: mass,
+          },
+        });
+        this.workers[0].onmessage = (data) => {
+          const impulse = data.imp;
+          const normalX = data.nX;
+          const normalY = data.nY;
+          const correctionX = data.cX;
+          const correctionY = data.cY;
           ballA.velocityX += (impulse * normalX) / ballA.mass;
           ballA.velocityY += (impulse * normalY) / ballA.mass;
           ballB.velocityX -= (impulse * normalX) / ballB.mass;
           ballB.velocityY -= (impulse * normalY) / ballB.mass;
-          const overlap = minDistance - distance;
-          const correctionFactor = 0.5;
-          const correctionX = overlap * normalX * correctionFactor;
-          const correctionY = overlap * normalY * correctionFactor;
           ballA.x -= correctionX;
           ballA.y -= correctionY;
           ballB.x += correctionX;
@@ -137,10 +125,7 @@ class Sym {
           if (Math.abs(ballA.velocityY) < 0.1) ballA.velocityY = 0;
           if (Math.abs(ballB.velocityX) < 0.1) ballB.velocityX = 0;
           if (Math.abs(ballB.velocityY) < 0.1) ballB.velocityY = 0;
-        }
-        // }
-        // if (!this.balls[i].isDragging) {
-        // }
+        };
       }
       this.balls[i].update(this.tilt);
     }
