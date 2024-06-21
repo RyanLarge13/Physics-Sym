@@ -12,9 +12,8 @@ class Ball {
     this.mass = r / 10;
     // this.restitution = 1;
     this.dampingY = 0.9;
-    this.dampingX = 0.9;
     this.gravity = 0.05;
-    this.friction = 0.01;
+    this.friction = 0.005;
     this.isDragging = false;
     this.tiltSensitivity = -0.0005;
   }
@@ -23,11 +22,15 @@ class Ball {
     this.sym.ctx.arc(this.x, this.y, this.r, Math.PI * 2, false);
     //Instead let's change color based on Y velocity. First we normalize the y velocity with min, max & current values
     // this.sym.ctx.fillStyle = this.fill;
-    let VNormal = this.velocityY / 5;
-    VNormal = Math.max(0, Math.min(1, VNormal));
-    const R = Math.round(VNormal * 255);
+    // let VNormal = this.velocityY / 5;
+    // VNormal = Math.max(0, Math.min(1, VNormal));
+    // const R = Math.round(VNormal * 255);
+    // const G = 0;
+    // const B = Math.round((1 - VNormal) * 255);
+    const velCum = Math.abs(this.velocityY) + Math.abs(this.velocityX);
+    const R = Math.min(255, Math.round(velCum * 50));
     const G = 0;
-    const B = Math.round((1 - VNormal) * 255);
+    const B = 255;
     const hex = `#${R.toString(16).padStart(2, "0")}${G.toString(16).padStart(
       2,
       "0"
@@ -40,6 +43,7 @@ class Ball {
     // We only want to run the physics on balls we are not dragging around the screen
     if (!this.isDragging) {
       // Handle Y physics and collisions
+      this.velocityY += this.gravity;
       if (this.y + this.r >= this.sym.height) {
         this.y = this.sym.height - this.r;
         // reverse the direction of ball when hitting the ground for bounce effect apply damping effect to decrease balls kinetic energy
@@ -50,36 +54,23 @@ class Ball {
           this.velocityY = 0;
           this.dampingY = 0.9;
         }
-      } else {
-        this.velocityY += this.gravity;
       }
       // Handle X physics & collisions
-      if (this.x + this.r >= this.sym.width || this.x - this.r <= 0) {
-        if (this.x + this.r > this.sym.width) {
-          this.x = this.sym.width - this.r;
-        }
-        if (this.x - this.r <= 0) {
-          this.x = 0 + this.r;
-        }
-        this.velocityX *= -this.dampingX;
-        //this.dampingX -= Math.abs((0.01 * this.r) / 100);
-        this.dampingX -= this.friction;
-        if (Math.abs(this.velocityX) <= 0.1) {
-          this.velocityX = 0;
-          this.dampingX = 0.9;
-        }
-      } else {
-        if (this.velocityX > 0) {
-          this.velocityX -= this.friction;
-          if (this.velocityX <= 0) {
-            this.velocityX = 0;
-          }
-        } else if (this.velocityX < 0) {
-          this.velocityX += this.friction;
-          if (this.velocityX >= 0) {
-            this.velocityX = 0;
-          }
-        }
+      if (Math.abs(this.velocityX) <= 0.1) {
+        this.velocityX = 0;
+      }
+      if (this.x + this.r >= this.sym.width) {
+        this.velocityX *= -1;
+        this.x = this.sym.width - this.r;
+      }
+      if (this.x - this.r <= 0) {
+        this.velocityX *= -1;
+        this.x = 0 + this.r;
+      }
+      if (this.velocityX > 0) {
+        this.velocityX -= this.friction;
+      } else if (this.velocityX < 0) {
+        this.velocityX += this.friction;
       }
       // Stop tilt for now
       if (tilt) {

@@ -33,12 +33,12 @@ class Sym {
   clear() {
     this.ctx.clearRect(0, 0, this.width, this.height);
   }
-  initializeWorkers() {
-    for (let i = 0; i < 4; i++) {
-      const newWorker = new Worker("./worker.js");
-      this.workers.push(newWorker);
-    }
-  }
+  // initializeWorkers() {
+  //   for (let i = 0; i < 4; i++) {
+  //     const newWorker = new Worker("./worker.js");
+  //     this.workers.push(newWorker);
+  //   }
+  // }
   initializeGrid() {
     // Call this method after creating a new Sym class and defining creating your balls to properly initialize the grid
     // const sizes = [];
