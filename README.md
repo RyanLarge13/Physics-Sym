@@ -34,7 +34,7 @@ on mobile
 
 ## Tech Stack
 
-- **Vanilla JS** nothing special here other than an HTML6 canvas and vanilla js.
+- **Vanilla JS** nothing special here other than an HTML5 canvas and vanilla js.
 - **Modularity** this code base takes advantage of an object oriented design (OOP) to help separate concerns throughout the app from the main simulation logic down to each ball
 
 ## Contributing
